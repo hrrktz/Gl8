@@ -1,257 +1,1268 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Sprechblasen Industrialisierung</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fabel-Verhör 🦊</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
-:root {
-    --primary-color: #2c3e50;
-    --delete-color: #e74c3c;
-    --bg-color: #f4f7f6;
-}
+  :root {
+    --bg: #0f0f23;
+    --bg2: #1a1a2e;
+    --panel: #16213e;
+    --panel2: #0f3460;
+    --accent: #e94560;
+    --gold: #f5a623;
+    --green: #4ecca3;
+    --blue: #00b4d8;
+    --text: #eaeaea;
+    --text-dim: #8888aa;
+    --pixel: 2px;
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: var(--bg-color);
-    touch-action: manipulation;
+font-family: ‘VT323’, monospace;
+background: var(–bg);
+color: var(–text);
+min-height: 100vh;
+padding: 0;
+image-rendering: pixelated;
 }
 
-header {
-    width: 100%;
-    background: var(--primary-color);
-    color: white;
-    padding: 1rem 0;
-    text-align: center;
+/* PIXEL BORDER MIXIN */
+.pixel-border {
+border: var(–pixel) solid var(–accent);
+box-shadow: var(–pixel) var(–pixel) 0 var(–pixel) #000,
+inset var(–pixel) var(–pixel) 0 0 rgba(255,255,255,0.05);
 }
 
-.controls {
-    margin: 15px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
+.pixel-border-gold {
+border: var(–pixel) solid var(–gold);
+box-shadow: var(–pixel) var(–pixel) 0 var(–pixel) #000;
 }
 
-button {
-    padding: 12px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background: white;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
-    border-radius: 8px;
-    font-weight: bold;
+.pixel-border-green {
+border: var(–pixel) solid var(–green);
+box-shadow: var(–pixel) var(–pixel) 0 var(–pixel) #000;
 }
 
-button.primary {
-    background: var(--primary-color);
-    color: white;
+/* SCANLINES OVERLAY */
+body::before {
+content: ‘’;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: repeating-linear-gradient(
+0deg,
+transparent,
+transparent 2px,
+rgba(0,0,0,0.08) 2px,
+rgba(0,0,0,0.08) 4px
+);
+pointer-events: none;
+z-index: 1000;
 }
 
-#canvas-container {
-    position: relative;
-    border: 2px solid #333;
-    background: #fff;
-    display: inline-block;
-    max-width: 95vw;
+/* HEADER */
+.header {
+background: var(–bg2);
+border-bottom: 3px solid var(–accent);
+padding: 12px 20px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 8px;
 }
 
-#bgImage {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    user-select: none;
-    -webkit-user-drag: none;
+.game-title {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 11px;
+color: var(–gold);
+text-shadow: 2px 2px 0 #000, -1px 0 var(–accent);
+line-height: 1.5;
 }
 
-.bubble {
-    position: absolute;
-    padding: 28px 18px 12px;
-    background: white;
-    border: 2px solid black;
-    border-radius: 20px;
-    min-width: 80px;
-    max-width: 250px;
-    font-size: 16px;
+.timer-bar {
+display: flex;
+align-items: center;
+gap: 10px;
+font-family: ‘Press Start 2P’, monospace;
+font-size: 9px;
 }
 
-.drag-handle {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 24px;
-    border-bottom: 1px solid #000;
-    border-radius: 18px 18px 0 0;
-    cursor: move;
-    background: rgba(0,0,0,0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    user-select: none;
+.timer-display {
+color: var(–green);
+min-width: 70px;
 }
 
-.bubble::after {
-    content: '';
-    position: absolute;
-    bottom: -12px;
-    left: 20px;
-    border-width: 12px 12px 0;
-    border-style: solid;
-    border-color: black transparent;
+.timer-track {
+width: 120px;
+height: 12px;
+background: #111;
+border: 2px solid var(–text-dim);
+position: relative;
+overflow: hidden;
 }
 
-.delete-btn {
-    position: absolute;
-    top: -12px;
-    right: -12px;
-    width: 24px;
-    height: 24px;
-    background: var(--delete-color);
-    color: white;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 22px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    border: 2px solid white;
+.timer-fill {
+height: 100%;
+background: var(–green);
+transition: width 1s linear, background 0.3s;
 }
 
-.hint {
-    margin: 15px;
-    font-size: 0.85em;
-    color: #7f8c8d;
-    text-align: center;
-    max-width: 80%;
+/* PROGRESS DOTS */
+.progress-bar {
+display: flex;
+gap: 6px;
+align-items: center;
+padding: 8px 20px;
+background: var(–bg);
+border-bottom: 2px solid #333;
+flex-wrap: wrap;
 }
+
+.phase-dot {
+width: 14px; height: 14px;
+background: #333;
+border: 2px solid #555;
+image-rendering: pixelated;
+flex-shrink: 0;
+transition: all 0.3s;
+}
+
+.phase-dot.active { background: var(–gold); border-color: var(–gold); box-shadow: 0 0 6px var(–gold); }
+.phase-dot.done { background: var(–green); border-color: var(–green); }
+
+.phase-label {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 7px;
+color: var(–text-dim);
+margin-left: 4px;
+margin-right: 10px;
+}
+
+.phase-label.active { color: var(–gold); }
+
+/* MAIN LAYOUT */
+.main {
+display: grid;
+grid-template-columns: 1fr 340px;
+gap: 0;
+min-height: calc(100vh - 90px);
+}
+
+@media (max-width: 700px) {
+.main { grid-template-columns: 1fr; }
+.sidebar { border-left: none; border-top: 3px solid var(–accent); }
+}
+
+/* LEFT: GAME AREA */
+.game-area {
+padding: 20px;
+display: flex;
+flex-direction: column;
+gap: 16px;
+}
+
+/* SCREEN / PHASE */
+.screen {
+display: none;
+flex-direction: column;
+gap: 14px;
+animation: fadePixel 0.3s steps(4);
+}
+
+.screen.active { display: flex; }
+
+@keyframes fadePixel {
+0% { opacity: 0; transform: translateY(4px); }
+100% { opacity: 1; transform: translateY(0); }
+}
+
+/* FABEL TEXT BOX */
+.fabel-box {
+background: var(–panel);
+border: 3px solid var(–blue);
+box-shadow: 3px 3px 0 #000;
+padding: 16px;
+font-size: 20px;
+line-height: 1.5;
+color: var(–text);
+position: relative;
+}
+
+.fabel-box::before {
+content: ‘FABEL’;
+position: absolute;
+top: -11px; left: 12px;
+background: var(–blue);
+color: #000;
+font-family: ‘Press Start 2P’, monospace;
+font-size: 8px;
+padding: 2px 6px;
+}
+
+/* PIXEL CHARACTER */
+.char-scene {
+display: flex;
+align-items: flex-end;
+gap: 16px;
+padding: 12px 0;
+}
+
+.pixel-char {
+flex-shrink: 0;
+image-rendering: pixelated;
+}
+
+.char-name {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 9px;
+color: var(–gold);
+margin-bottom: 6px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.char-name .blink {
+width: 8px; height: 8px;
+background: var(–gold);
+animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* SPEECH BUBBLE */
+.speech-bubble {
+background: var(–panel2);
+border: 3px solid var(–gold);
+box-shadow: 3px 3px 0 #000;
+padding: 14px 16px;
+font-size: 22px;
+line-height: 1.5;
+color: var(–text);
+flex: 1;
+position: relative;
+min-height: 80px;
+}
+
+.speech-bubble::before {
+content: ‘’;
+position: absolute;
+left: -12px;
+bottom: 20px;
+border: 6px solid transparent;
+border-right-color: var(–gold);
+}
+
+.typing-cursor { animation: blink 0.7s steps(1) infinite; }
+
+/* QUESTION PROMPT */
+.question-prompt {
+background: var(–panel);
+border: 3px solid var(–accent);
+box-shadow: 3px 3px 0 #000;
+padding: 14px;
+font-size: 20px;
+line-height: 1.5;
+position: relative;
+}
+
+.question-prompt::before {
+content: ‘DEINE FRAGE’;
+position: absolute;
+top: -11px; left: 12px;
+background: var(–accent);
+color: #fff;
+font-family: ‘Press Start 2P’, monospace;
+font-size: 8px;
+padding: 2px 6px;
+}
+
+/* HINT CHIPS */
+.hint-chips {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+}
+
+.hint-chip {
+background: #1a1a2e;
+border: 2px solid var(–text-dim);
+padding: 6px 10px;
+font-size: 16px;
+color: var(–text-dim);
+cursor: pointer;
+transition: all 0.1s;
+user-select: none;
+}
+
+.hint-chip:hover {
+border-color: var(–blue);
+color: var(–blue);
+background: #0a1628;
+}
+
+.hint-chip:active { transform: translate(1px,1px); }
+
+/* INPUT */
+.pixel-input {
+width: 100%;
+background: #0a0a1a;
+border: 3px solid var(–text-dim);
+color: var(–text);
+font-family: ‘VT323’, monospace;
+font-size: 22px;
+padding: 10px 14px;
+outline: none;
+transition: border-color 0.2s;
+resize: none;
+}
+
+.pixel-input:focus { border-color: var(–accent); }
+
+/* BUTTONS */
+.pixel-btn {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 9px;
+padding: 12px 20px;
+border: none;
+cursor: pointer;
+text-transform: uppercase;
+transition: transform 0.05s;
+box-shadow: 4px 4px 0 #000;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+}
+
+.pixel-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+.pixel-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-red { background: var(–accent); color: #fff; }
+.btn-gold { background: var(–gold); color: #000; }
+.btn-green { background: var(–green); color: #000; }
+.btn-blue { background: var(–blue); color: #000; }
+
+/* DIFFICULTY SELECTOR */
+.diff-row {
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+.diff-btn {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 8px;
+padding: 10px 14px;
+border: 3px solid;
+background: transparent;
+cursor: pointer;
+transition: all 0.1s;
+box-shadow: 3px 3px 0 #000;
+line-height: 1.5;
+}
+
+.diff-btn:hover, .diff-btn.selected { color: #000; }
+.diff-btn.easy { border-color: var(–green); color: var(–green); }
+.diff-btn.easy:hover, .diff-btn.easy.selected { background: var(–green); }
+.diff-btn.medium { border-color: var(–gold); color: var(–gold); }
+.diff-btn.medium:hover, .diff-btn.medium.selected { background: var(–gold); }
+.diff-btn.hard { border-color: var(–accent); color: var(–accent); }
+.diff-btn.hard:hover, .diff-btn.hard.selected { background: var(–accent); color: #fff; }
+
+/* SIDEBAR */
+.sidebar {
+background: var(–bg2);
+border-left: 3px solid var(–accent);
+padding: 16px;
+display: flex;
+flex-direction: column;
+gap: 16px;
+overflow-y: auto;
+}
+
+.sidebar-section {
+border: 2px solid #333;
+padding: 12px;
+background: var(–panel);
+position: relative;
+}
+
+.sidebar-section-title {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 8px;
+color: var(–gold);
+margin-bottom: 10px;
+padding-bottom: 6px;
+border-bottom: 2px solid #333;
+}
+
+/* ANALOG TASK BOX */
+.analog-box {
+border: 3px solid var(–gold);
+background: #1a1200;
+padding: 12px;
+position: relative;
+}
+
+.analog-box::before {
+content: ‘✏ ANALOG’;
+position: absolute;
+top: -11px; left: 8px;
+background: var(–gold);
+color: #000;
+font-family: ‘Press Start 2P’, monospace;
+font-size: 7px;
+padding: 2px 5px;
+}
+
+.analog-task {
+font-size: 18px;
+line-height: 1.5;
+color: #ffd;
+margin-bottom: 8px;
+}
+
+.merksatz-box {
+background: #0a0800;
+border: 2px dashed var(–gold);
+padding: 10px;
+font-size: 17px;
+color: var(–gold);
+line-height: 1.5;
+font-style: italic;
+}
+
+/* CHECKLIST */
+.checklist {
+list-style: none;
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+
+.checklist li {
+display: flex;
+align-items: flex-start;
+gap: 8px;
+font-size: 17px;
+line-height: 1.4;
+cursor: pointer;
+padding: 4px;
+transition: background 0.1s;
+}
+
+.checklist li:hover { background: rgba(255,255,255,0.03); }
+
+.check-box {
+width: 16px; height: 16px;
+border: 2px solid var(–text-dim);
+flex-shrink: 0;
+margin-top: 2px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+transition: all 0.1s;
+}
+
+.checklist li.checked .check-box {
+background: var(–green);
+border-color: var(–green);
+color: #000;
+}
+
+.checklist li.checked span { text-decoration: line-through; color: var(–text-dim); }
+
+/* XP / SCORE */
+.xp-bar {
+height: 10px;
+background: #111;
+border: 2px solid #444;
+overflow: hidden;
+margin-top: 6px;
+}
+
+.xp-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–green), var(–blue));
+transition: width 0.4s steps(8);
+}
+
+.xp-label {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 8px;
+color: var(–green);
+margin-top: 4px;
+}
+
+/* CHARACTER PIXEL ART via CSS */
+.fox-sprite {
+width: 64px;
+height: 64px;
+position: relative;
+image-rendering: pixelated;
+}
+
+canvas.pixel-canvas {
+image-rendering: pixelated;
+display: block;
+}
+
+/* RESULT SCREEN */
+.result-stars {
+font-size: 40px;
+letter-spacing: 4px;
+text-align: center;
+filter: drop-shadow(0 0 8px var(–gold));
+}
+
+.result-stat {
+display: flex;
+justify-content: space-between;
+font-size: 20px;
+padding: 6px 0;
+border-bottom: 1px solid #333;
+}
+
+.result-stat span:last-child { color: var(–green); font-size: 22px; }
+
+/* SCAFFOLD BADGE */
+.scaffold-badge {
+display: inline-block;
+background: var(–blue);
+color: #000;
+font-family: ‘Press Start 2P’, monospace;
+font-size: 7px;
+padding: 3px 6px;
+margin-bottom: 8px;
+}
+
+.loading-dots::after {
+content: ‘…’;
+animation: dots 1.2s steps(3) infinite;
+}
+
+@keyframes dots {
+0% { content: ‘.’; }
+33% { content: ‘..’; }
+66% { content: ‘…’; }
+}
+
+.flash { animation: flash 0.3s steps(2); }
+@keyframes flash {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.3; }
+}
+
+/* START SCREEN */
+.start-logo {
+text-align: center;
+padding: 20px 0 10px;
+}
+
+.start-logo h1 {
+font-family: ‘Press Start 2P’, monospace;
+font-size: clamp(14px, 3vw, 20px);
+color: var(–gold);
+text-shadow: 3px 3px 0 var(–accent), 6px 6px 0 #000;
+line-height: 1.6;
+margin-bottom: 10px;
+}
+
+.start-subtitle {
+font-size: 22px;
+color: var(–text-dim);
+}
+
+.intro-text {
+font-size: 19px;
+line-height: 1.6;
+color: var(–text);
+background: var(–panel);
+border: 2px solid #444;
+padding: 14px;
+}
+
+.phase-overview {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.phase-item {
+display: flex;
+align-items: flex-start;
+gap: 10px;
+font-size: 18px;
+line-height: 1.4;
+}
+
+.phase-num {
+font-family: ‘Press Start 2P’, monospace;
+font-size: 9px;
+background: var(–accent);
+color: #fff;
+padding: 4px 7px;
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.phase-num.gold { background: var(–gold); color: #000; }
+.phase-num.green { background: var(–green); color: #000; }
+.phase-num.blue { background: var(–blue); color: #000; }
 </style>
-</head>
 
+</head>
 <body>
 
-<header>
-<h1>Lass die Menschen von damals sprechen!</h1>
-</header>
+<!-- HEADER -->
 
-<div class="controls">
-<button class="primary" onclick="addBubble()">+ Sprechblase</button>
-<button onclick="exportImage()">Als JPEG speichern</button>
+<div class="header">
+  <div>
+    <div class="game-title">🦊 FABEL-VERHÖR</div>
+    <div style="font-size:15px; color:var(--text-dim); margin-top:3px;">Klasse 6 · Deutsch · ~15 Min</div>
+  </div>
+  <div class="timer-bar">
+    <div>⏱</div>
+    <div class="timer-display" id="timerDisplay">15:00</div>
+    <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+  </div>
 </div>
 
-<div id="canvas-container">
-<img id="bgImage"
-crossorigin="anonymous"
-src="https://upload.wikimedia.org/wikipedia/commons/1/17/%22Der_Streik%22_von_Robert_Koehler.jpg"
-alt="Analysebild">
+<!-- PROGRESS -->
+
+<div class="progress-bar" id="progressBar" style="display:none">
+  <div class="phase-dot active" id="dot0"></div>
+  <div class="phase-label active" id="lbl0">Lesen</div>
+  <div class="phase-dot" id="dot1"></div>
+  <div class="phase-label" id="lbl1">Verhör</div>
+  <div class="phase-dot" id="dot2"></div>
+  <div class="phase-label" id="lbl2">Merkmale</div>
+  <div class="phase-dot" id="dot3"></div>
+  <div class="phase-label" id="lbl3">Auswertung</div>
 </div>
 
-<p class="hint">
-Oben an der Leiste ziehen. In die Mitte klicken zum Schreiben. [x] löscht die Blase.
-</p>
+<div class="main">
+  <div class="game-area">
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+```
+<!-- ═══ STARTSCREEN ═══ -->
+<div class="screen active" id="screen-start">
+  <div class="start-logo">
+    <h1>FABEL-<br>VERHÖR</h1>
+    <div class="start-subtitle">Befrage die Figuren. Entdecke die Merkmale.</div>
+  </div>
+
+  <div class="intro-text">
+    Du liest heute eine Fabel – und dann befragst du eine der Figuren wie ein echter Detektiv! 🕵️<br><br>
+    Die Figur antwortet dir live. Deine Aufgabe: Herausfinden, <strong style="color:var(--gold)">was eine Fabel ausmacht</strong>.
+  </div>
+
+  <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--text-dim);margin-top:4px;">SCHWIERIGKEITSGRAD:</div>
+  <div class="diff-row">
+    <button class="diff-btn easy selected" id="diff-easy" onclick="selectDiff('easy')">⭐ LEICHT<br><span style="font-size:7px;font-weight:normal">(mit Hilfen)</span></button>
+    <button class="diff-btn medium" id="diff-medium" onclick="selectDiff('medium')">⭐⭐ MITTEL<br><span style="font-size:7px;font-weight:normal">(wenig Hilfen)</span></button>
+    <button class="diff-btn hard" id="diff-hard" onclick="selectDiff('hard')">⭐⭐⭐ EXPERTE<br><span style="font-size:7px;font-weight:normal">(ohne Hilfen)</span></button>
+  </div>
+
+  <div class="phase-overview">
+    <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--text-dim);margin-bottom:4px;">SO LÄUFT ES AB:</div>
+    <div class="phase-item"><div class="phase-num">1</div><div><strong>Fabel lesen</strong> – Lies die Fabel aufmerksam durch</div></div>
+    <div class="phase-item"><div class="phase-num gold">2</div><div><strong>Verhör führen</strong> – Stelle der Figur 3 Fragen</div></div>
+    <div class="phase-item"><div class="phase-num green">3</div><div><strong>Merkmale sichern</strong> – Notiere analog in dein Heft</div></div>
+    <div class="phase-item"><div class="phase-num blue">4</div><div><strong>Auswertung</strong> – Wie gut warst du?</div></div>
+  </div>
+
+  <button class="pixel-btn btn-gold" onclick="startGame()">▶ SPIEL STARTEN</button>
+</div>
+
+<!-- ═══ PHASE 1: LESEN ═══ -->
+<div class="screen" id="screen-read">
+  <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold)">PHASE 1 · FABEL LESEN</div>
+
+  <div class="fabel-box" id="fabelText"></div>
+
+  <div id="scaffoldRead" style="display:none">
+    <div class="scaffold-badge">💡 LESETIPP</div>
+    <div class="hint-chips" id="readHints"></div>
+  </div>
+
+  <div style="font-size:18px;color:var(--text-dim)">
+    Lies die Fabel in Ruhe durch. Unterstreiche, was dir auffällt.
+  </div>
+
+  <button class="pixel-btn btn-red" onclick="goToInterview()">WEITER: VERHÖR BEGINNEN →</button>
+</div>
+
+<!-- ═══ PHASE 2: VERHÖR ═══ -->
+<div class="screen" id="screen-interview">
+  <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold)">PHASE 2 · VERHÖR <span id="questionCounter" style="color:var(--accent)">0/3</span></div>
+
+  <div class="char-scene">
+    <canvas class="pixel-canvas" id="charCanvas" width="64" height="80"></canvas>
+    <div style="flex:1">
+      <div class="char-name"><span id="charNameDisplay">???</span><div class="blink"></div></div>
+      <div class="speech-bubble" id="speechBubble">
+        <span id="speechText">...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="scaffoldInterview" style="display:none">
+    <div class="scaffold-badge">💡 FRAGEHILFEN – Tippe auf eine Idee:</div>
+    <div class="hint-chips" id="questionHints"></div>
+  </div>
+
+  <div class="question-prompt">
+    <textarea class="pixel-input" id="questionInput" rows="2"
+      placeholder="Schreib deine Frage hier..." maxlength="300"></textarea>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <button class="pixel-btn btn-red" id="askBtn" onclick="askQuestion()">
+      ❓ FRAGEN STELLEN
+    </button>
+    <div style="font-size:17px;color:var(--text-dim)">Noch <span id="questionsLeft" style="color:var(--gold)">3</span> Fragen übrig</div>
+  </div>
+
+  <div id="interviewHistory" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
+</div>
+
+<!-- ═══ PHASE 3: MERKMALE SICHERN ═══ -->
+<div class="screen" id="screen-secure">
+  <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold)">PHASE 3 · MERKMALE SICHERN</div>
+
+  <div style="background:var(--panel);border:2px solid var(--green);padding:14px;font-size:20px;line-height:1.6">
+    🎉 Gut gemacht! Du hast die Figur befragt.<br>
+    Jetzt geht es darum: <strong style="color:var(--green)">Was hast du über Fabeln gelernt?</strong>
+  </div>
+
+  <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:var(--text-dim)">WÄHLE DIE MERKMALE, DIE DU ENTDECKT HAST:</div>
+
+  <div id="merkmalCards" style="display:flex;flex-direction:column;gap:8px"></div>
+
+  <button class="pixel-btn btn-green" onclick="goToResult()" id="secureBtn">
+    AUSWERTUNG ANSEHEN →
+  </button>
+</div>
+
+<!-- ═══ PHASE 4: ERGEBNIS ═══ -->
+<div class="screen" id="screen-result">
+  <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold)">PHASE 4 · AUSWERTUNG</div>
+
+  <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+
+  <div style="font-size:22px;text-align:center;color:var(--text);margin:8px 0" id="resultMsg"></div>
+
+  <div id="resultStats" style="display:flex;flex-direction:column;gap:0;border:2px solid #333;padding:10px;background:var(--panel)"></div>
+
+  <div style="background:#001a00;border:2px solid var(--green);padding:14px;font-size:19px;line-height:1.6" id="resultFeedback"></div>
+
+  <button class="pixel-btn btn-gold" onclick="restartGame()">🔄 NOCHMAL SPIELEN</button>
+</div>
+```
+
+  </div><!-- /game-area -->
+
+  <!-- ═══ SIDEBAR ═══ -->
+
+  <div class="sidebar">
+
+```
+<!-- XP -->
+<div class="sidebar-section">
+  <div class="sidebar-section-title">⚡ PUNKTE</div>
+  <div class="xp-label">XP: <span id="xpDisplay">0</span> / 100</div>
+  <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+</div>
+
+<!-- ANALOG TASK 1 -->
+<div class="analog-box" id="analogTask1" style="display:none">
+  <div class="analog-task">
+    📖 <strong>Aufgabe für dein Heft:</strong><br>
+    Lies die Fabel und notiere: <em>Welche Tiere kommen vor? Was streiten sie sich?</em>
+  </div>
+  <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--gold);margin-top:6px">→ HEFT AUFSCHLAGEN!</div>
+</div>
+
+<!-- ANALOG TASK 2 – Merksatz -->
+<div class="analog-box" id="analogTask2" style="display:none">
+  <div class="analog-task">✏️ <strong>Merksatz sichern:</strong><br>Schreibe diesen Satz in dein Heft:</div>
+  <div class="merksatz-box">
+    „Eine Fabel ist eine kurze Geschichte mit Tieren als Figuren, die wie Menschen handeln und am Ende eine Lehre vermitteln."
+  </div>
+</div>
+
+<!-- CHECKLISTE -->
+<div class="sidebar-section" id="checklistSection" style="display:none">
+  <div class="sidebar-section-title">✅ MEINE CHECKLISTE</div>
+  <ul class="checklist" id="checklist">
+    <li onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Fabel gelesen</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box">✓</div><span>3 Fragen gestellt</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Tiere + Handlung notiert</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Merksatz ins Heft</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Merkmale erkannt</span></li>
+  </ul>
+</div>
+
+<!-- MERKMAL-HILFE -->
+<div class="sidebar-section" id="merkmalHelp" style="display:none">
+  <div class="sidebar-section-title">📚 FABELN – MERKMALE</div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:17px;line-height:1.4;padding:6px;background:#0a0a1a;border-left:3px solid var(--blue)">🦊 Tiere als Figuren</div>
+    <div style="font-size:17px;line-height:1.4;padding:6px;background:#0a0a1a;border-left:3px solid var(--blue)">🎭 Tiere handeln wie Menschen</div>
+    <div style="font-size:17px;line-height:1.4;padding:6px;background:#0a0a1a;border-left:3px solid var(--blue)">⚔️ Konflikt zwischen Figuren</div>
+    <div style="font-size:17px;line-height:1.4;padding:6px;background:#0a0a1a;border-left:3px solid var(--blue)">📖 Kurze Geschichte</div>
+    <div style="font-size:17px;line-height:1.4;padding:6px;background:#0a0a1a;border-left:3px solid var(--blue)">💡 Moral / Lehre am Ende</div>
+  </div>
+</div>
+```
+
+  </div><!-- /sidebar -->
+</div><!-- /main -->
 
 <script>
-const container = document.getElementById('canvas-container');
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
 
-function clamp(val, min, max) {
-    return Math.max(min, Math.min(max, val));
+const FABEL = {
+  title: "Der Rabe und der Fuchs",
+  text: `Ein Rabe hatte ein Stück Käse gestohlen und sich auf einen hohen Ast gesetzt. Da kam ein Fuchs vorbei, sah den Käse und dachte sich einen Plan aus.
+
+„Oh, edler Rabe!", rief er, „wie wunderschön du bist! Deine Federn glänzen wie poliertes Ebenholz. Wenn deine Stimme so schön ist wie dein Aussehen, dann bist du der König aller Vögel!"
+
+Der Rabe war sehr stolz und öffnete seinen Schnabel, um zu krächzen. In diesem Moment fiel der Käse herunter – und der Fuchs schnappte ihn.
+
+„Danke", sagte der Fuchs grinsend. „Das war deine Lehre: Wer Schmeichelei glaubt, bezahlt teuer dafür."`,
+  moral: "Wer Schmeichelei glaubt, bezahlt teuer dafür.",
+  char: "Fuchs",
+  charEmoji: "🦊"
+};
+
+const MERKMALE = [
+  { id: "tiere", text: "🦊 Tiere sind die Hauptfiguren", correct: true },
+  { id: "menschlich", text: "🎭 Die Tiere sprechen und denken wie Menschen", correct: true },
+  { id: "konflikt", text: "⚔️ Es gibt einen Konflikt zwischen den Figuren", correct: true },
+  { id: "kurz", text: "📖 Die Geschichte ist kurz", correct: true },
+  { id: "moral", text: "💡 Am Ende steht eine Moral / Lehre", correct: true },
+  { id: "falsch1", text: "🏰 Die Geschichte spielt in einem Schloss", correct: false },
+  { id: "falsch2", text: "😢 Die Geschichte hat immer ein trauriges Ende", correct: false },
+];
+
+const QUESTION_HINTS = {
+  easy: [
+    "Warum hast du den Raben geschmeichelt?",
+    "Was dachtest du, als du den Käse sahst?",
+    "Was soll man aus dieser Geschichte lernen?",
+    "Bist du ein ehrlicher Fuchs?",
+    "Hast du den Raben ausgetrickst – war das fair?"
+  ],
+  medium: [
+    "Was ist die Moral dieser Geschichte?",
+    "Warum nutzt du Schmeichelei als Waffe?",
+    "Für welche menschliche Eigenschaft stehst du?"
+  ],
+  hard: []
+};
+
+const READ_HINTS = [
+  "Markiere: Welche Tiere kommen vor?",
+  "Unterstreiche: Was will jede Figur?",
+  "Kreise ein: Wo steht die Moral?"
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+
+let difficulty = 'easy';
+let questionsAsked = 0;
+let maxQuestions = 3;
+let xp = 0;
+let conversationHistory = [];
+let timerInterval = null;
+let timeLeft = 15 * 60;
+let selectedMerkmale = new Set();
+let timerStarted = false;
+
+// ═══════════════════════════════════════
+// PIXEL ART CHARACTER (Canvas)
+// ═══════════════════════════════════════
+
+function drawFox(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const S = 4; // scale
+  // Fox pixel art (16x20 grid)
+  const pixels = [
+    "....OOOO....",
+    "...O....O...",
+    "..OO.OO.OO..",
+    "..O..OO..O..",
+    "..OOOOOOOO..",
+    "...OOOOOO...",
+    "....OOOO....",
+    "...OXXXOO...",
+    "..OXXXXXXO..",
+    "..OXXXXXXO..",
+    "...OXXXXO...",
+    "....OOOO....",
+    "...O....O...",
+    "..O......O..",
+  ];
+  const colors = { 'O': '#e87c2a', 'X': '#fff5e6', '.': 'transparent' };
+  pixels.forEach((row, y) => {
+    [...row].forEach((p, x) => {
+      if (p !== '.') {
+        ctx.fillStyle = colors[p] || '#e87c2a';
+        ctx.fillRect(x * S, y * S, S, S);
+      }
+    });
+  });
+  // Eyes
+  ctx.fillStyle = '#1a0a00';
+  ctx.fillRect(4*S, 3*S, S, S);
+  ctx.fillRect(7*S, 3*S, S, S);
 }
 
-function addBubble() {
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
+// ═══════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════
 
-    const handle = document.createElement('div');
-    handle.className = 'drag-handle';
-    handle.textContent = 'ziehen';
-    handle.contentEditable = false;
-
-    const text = document.createElement('div');
-    text.contentEditable = true;
-    text.innerText = 'Text...';
-    text.style.outline = 'none';
-
-    const delBtn = document.createElement('div');
-    delBtn.className = 'delete-btn';
-    delBtn.innerHTML = '&times;';
-    delBtn.contentEditable = false;
-
-    delBtn.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (confirm('Sprechblase löschen?')) bubble.remove();
-    });
-
-    bubble.appendChild(handle);
-    bubble.appendChild(delBtn);
-    bubble.appendChild(text);
-
-    bubble.style.left = '50px';
-    bubble.style.top = '50px';
-
-    handle.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-
-        const startX = e.clientX;
-        const startY = e.clientY;
-
-        const cRect = container.getBoundingClientRect();
-        const bRect = bubble.getBoundingClientRect();
-
-        const offsetLeft = bRect.left - cRect.left;
-        const offsetTop = bRect.top - cRect.top;
-
-        const move = (evt) => {
-            const dx = evt.clientX - startX;
-            const dy = evt.clientY - startY;
-
-            const newLeft = offsetLeft + dx;
-            const newTop = offsetTop + dy;
-
-            const maxLeft = cRect.width - bRect.width;
-            const maxTop = cRect.height - bRect.height;
-
-            bubble.style.left = clamp(newLeft, 0, maxLeft) + 'px';
-            bubble.style.top = clamp(newTop, 0, maxTop) + 'px';
-        };
-
-        const up = () => {
-            document.removeEventListener('pointermove', move);
-            document.removeEventListener('pointerup', up);
-        };
-
-        document.addEventListener('pointermove', move);
-        document.addEventListener('pointerup', up);
-    });
-
-    container.appendChild(bubble);
-
-    text.focus();
-    document.getSelection().selectAllChildren(text);
+function startTimer() {
+  if (timerStarted) return;
+  timerStarted = true;
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    document.getElementById('timerDisplay').textContent =
+      `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const pct = (timeLeft / (15*60)) * 100;
+    const fill = document.getElementById('timerFill');
+    fill.style.width = pct + '%';
+    if (pct < 25) fill.style.background = 'var(--accent)';
+    else if (pct < 50) fill.style.background = 'var(--gold)';
+    if (timeLeft <= 0) { clearInterval(timerInterval); goToResult(); }
+  }, 1000);
 }
 
-function exportImage() {
-    const element = document.getElementById("canvas-container");
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
 
-    html2canvas(element, {
-        scale: 3,
-        useCORS: true
-    }).then(canvas => {
-        const link = document.createElement("a");
-        link.download = "sprechblasen-gl.jpg";
-        link.href = canvas.toDataURL("image/jpeg", 0.95);
-        link.click();
-    });
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
 }
+
+function updateProgress(phase) {
+  document.getElementById('progressBar').style.display = 'flex';
+  ['dot0','dot1','dot2','dot3'].forEach((id, i) => {
+    const dot = document.getElementById(id);
+    const lbl = document.getElementById('lbl' + i);
+    dot.classList.remove('active','done');
+    lbl.classList.remove('active');
+    if (i < phase) { dot.classList.add('done'); }
+    else if (i === phase) { dot.classList.add('active'); lbl.classList.add('active'); }
+  });
+}
+
+function selectDiff(d) {
+  difficulty = d;
+  ['easy','medium','hard'].forEach(x => document.getElementById('diff-'+x).classList.remove('selected'));
+  document.getElementById('diff-'+d).classList.add('selected');
+}
+
+function startGame() {
+  startTimer();
+  showScreen('read');
+  updateProgress(0);
+
+  // Fill fabel
+  const fb = document.getElementById('fabelText');
+  fb.innerHTML = `<strong style="color:var(--gold)">${FABEL.title}</strong><br><br>${FABEL.text.replace(/\n\n/g,'<br><br>')}`;
+
+  // Scaffold for easy
+  if (difficulty === 'easy') {
+    document.getElementById('scaffoldRead').style.display = 'block';
+    const hints = document.getElementById('readHints');
+    READ_HINTS.forEach(h => {
+      const chip = document.createElement('div');
+      chip.className = 'hint-chip';
+      chip.textContent = h;
+      hints.appendChild(chip);
+    });
+  }
+
+  // Sidebar
+  document.getElementById('analogTask1').style.display = 'block';
+  document.getElementById('checklistSection').style.display = 'block';
+}
+
+function goToInterview() {
+  showScreen('interview');
+  updateProgress(1);
+  addXP(10);
+
+  document.getElementById('analogTask2').style.display = 'block';
+
+  // Draw character
+  const canvas = document.getElementById('charCanvas');
+  drawFox(canvas);
+  document.getElementById('charNameDisplay').textContent = FABEL.char + ' ' + FABEL.charEmoji;
+
+  // Opening line
+  typeText('speechText', `Hmpf... was willst du? Ich bin beschäftigt. Aber gut, stell deine Fragen – wenn du es wagst! Ich bin der Fuchs, und ich habe nichts zu verbergen... oder doch? 😏`);
+
+  document.getElementById('questionCounter').textContent = `0/${maxQuestions}`;
+  document.getElementById('questionsLeft').textContent = maxQuestions;
+
+  // Scaffold hints
+  if (difficulty !== 'hard') {
+    document.getElementById('scaffoldInterview').style.display = 'block';
+    const container = document.getElementById('questionHints');
+    const hints = QUESTION_HINTS[difficulty] || QUESTION_HINTS['medium'];
+    hints.forEach(h => {
+      const chip = document.createElement('div');
+      chip.className = 'hint-chip';
+      chip.textContent = h;
+      chip.onclick = () => {
+        document.getElementById('questionInput').value = h;
+      };
+      container.appendChild(chip);
+    });
+  }
+
+  // System prompt for Claude
+  conversationHistory = [];
+}
+
+async function askQuestion() {
+  const input = document.getElementById('questionInput');
+  const question = input.value.trim();
+  if (!question) return;
+  if (questionsAsked >= maxQuestions) return;
+
+  const btn = document.getElementById('askBtn');
+  btn.disabled = true;
+  input.disabled = true;
+
+  questionsAsked++;
+  const left = maxQuestions - questionsAsked;
+  document.getElementById('questionCounter').textContent = `${questionsAsked}/${maxQuestions}`;
+  document.getElementById('questionsLeft').textContent = left;
+
+  // Add to history display
+  const history = document.getElementById('interviewHistory');
+  const qDiv = document.createElement('div');
+  qDiv.style.cssText = 'display:flex;gap:8px;align-items:flex-start';
+  qDiv.innerHTML = `<div style="background:var(--accent);color:#fff;font-family:'Press Start 2P',monospace;font-size:7px;padding:4px 7px;flex-shrink:0;margin-top:4px">DU</div>
+    <div style="background:#1a0a0a;border:2px solid var(--accent);padding:10px;font-size:19px;flex:1;line-height:1.5">${question}</div>`;
+  history.appendChild(qDiv);
+
+  // Speech bubble loading
+  typeText('speechText', '');
+  document.getElementById('speechText').innerHTML = '<span class="loading-dots">Denkt nach</span>';
+
+  // Call Claude
+  const systemPrompt = `Du bist der Fuchs aus der Fabel "Der Rabe und der Fuchs" von Äsop. Du antwortest im Verhör auf Deutsch in der Ich-Perspektive als diese Figur – schlau, ein bisschen arrogant, aber auch ein wenig schuldbewusst.
+
+Die Fabel: Ein Rabe hat Käse gestohlen. Du hast ihn mit Schmeichelei dazu gebracht, zu krächzen, damit der Käse fällt. Die Moral ist: "Wer Schmeichelei glaubt, bezahlt teuer dafür."
+
+WICHTIG: Du bist für Sechstklässler (11-12 Jahre). Antworte in 2-4 Sätzen, einfache Sprache, lebendig und ein bisschen witzig. Verrate indirekt Hinweise auf die Merkmale der Fabel (Tiere handeln wie Menschen, Moral, Konflikt), aber sag sie nicht direkt. Bleib immer in der Rolle.`;
+
+  conversationHistory.push({ role: 'user', content: question });
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: conversationHistory
+      })
+    });
+    const data = await res.json();
+    const answer = data.content.map(b => b.text || '').join('');
+    conversationHistory.push({ role: 'assistant', content: answer });
+
+    typeText('speechText', answer);
+
+    // Add to history
+    const aDiv = document.createElement('div');
+    aDiv.style.cssText = 'display:flex;gap:8px;align-items:flex-start';
+    aDiv.innerHTML = `<div style="background:var(--gold);color:#000;font-family:'Press Start 2P',monospace;font-size:7px;padding:4px 7px;flex-shrink:0;margin-top:4px">FUCHS</div>
+      <div style="background:var(--panel2);border:2px solid var(--gold);padding:10px;font-size:19px;flex:1;line-height:1.5">${answer}</div>`;
+    history.appendChild(aDiv);
+
+    addXP(20);
+
+  } catch(e) {
+    document.getElementById('speechText').textContent = 'Hmm... ich sage lieber nichts dazu. (Fehler aufgetreten – bitte erneut versuchen.)';
+  }
+
+  input.value = '';
+  input.disabled = false;
+  btn.disabled = false;
+
+  if (questionsAsked >= maxQuestions) {
+    setTimeout(() => goToSecure(), 1200);
+  }
+}
+
+function goToSecure() {
+  showScreen('secure');
+  updateProgress(2);
+
+  // Show merkmal reference in sidebar
+  document.getElementById('merkmalHelp').style.display = 'block';
+
+  const container = document.getElementById('merkmalCards');
+  container.innerHTML = '';
+
+  // Shuffle
+  const shuffled = [...MERKMALE].sort(() => Math.random() - 0.5);
+
+  shuffled.forEach(m => {
+    const card = document.createElement('div');
+    card.style.cssText = `
+      display:flex; align-items:center; gap:12px;
+      padding:12px; border:3px solid #333; background:var(--panel);
+      cursor:pointer; transition:all 0.1s; font-size:20px; line-height:1.4;
+    `;
+    card.innerHTML = `<div style="width:20px;height:20px;border:3px solid #555;flex-shrink:0" class="card-check"></div>
+      <span>${m.text}</span>`;
+    card.onclick = () => {
+      if (selectedMerkmale.has(m.id)) {
+        selectedMerkmale.delete(m.id);
+        card.style.borderColor = '#333';
+        card.style.background = 'var(--panel)';
+        card.querySelector('.card-check').style.background = '';
+        card.querySelector('.card-check').style.borderColor = '#555';
+      } else {
+        selectedMerkmale.add(m.id);
+        card.style.borderColor = 'var(--green)';
+        card.style.background = '#001a0a';
+        card.querySelector('.card-check').style.background = 'var(--green)';
+        card.querySelector('.card-check').style.borderColor = 'var(--green)';
+      }
+    };
+    container.appendChild(card);
+  });
+}
+
+function goToResult() {
+  showScreen('secure');
+  goToActualResult();
+}
+
+function goToActualResult() {
+  showScreen('result');
+  updateProgress(3);
+  clearInterval(timerInterval);
+
+  const correct = MERKMALE.filter(m => m.correct).map(m => m.id);
+  const selected = [...selectedMerkmale];
+  const truePos = selected.filter(id => correct.includes(id)).length;
+  const falsePos = selected.filter(id => !correct.includes(id)).length;
+  const score = Math.max(0, truePos - falsePos);
+  const total = correct.length;
+
+  addXP(score * 10);
+
+  // Stars
+  let stars = '⭐';
+  let msg = 'Du hast gut zugehört!';
+  if (score >= 4) { stars = '⭐⭐⭐'; msg = 'Ausgezeichnet! Du bist ein Fabel-Experte!'; }
+  else if (score >= 2) { stars = '⭐⭐'; msg = 'Gut gemacht! Du hast die wichtigsten Merkmale gefunden.'; }
+
+  document.getElementById('resultStars').textContent = stars;
+  document.getElementById('resultMsg').textContent = msg;
+
+  const stats = document.getElementById('resultStats');
+  stats.innerHTML = `
+    <div class="result-stat"><span>Richtige Merkmale erkannt</span><span>${truePos} / ${total}</span></div>
+    <div class="result-stat"><span>Falsche angekreuzt</span><span style="color:${falsePos>0?'var(--accent)':'var(--green)'}">${falsePos}</span></div>
+    <div class="result-stat"><span>Gestellte Fragen</span><span>${questionsAsked}</span></div>
+    <div class="result-stat"><span>Gesamt-XP</span><span>${xp}</span></div>
+  `;
+
+  const feedback = document.getElementById('resultFeedback');
+  const missed = correct.filter(id => !selected.includes(id));
+  const missedLabels = missed.map(id => MERKMALE.find(m => m.id === id)?.text).join(', ');
+
+  feedback.innerHTML = `<strong style="color:var(--green)">✓ Das hast du gut gemacht:</strong><br>
+    Du hast den Fuchs befragt und dabei aktiv über die Fabel nachgedacht.<br><br>
+    ${missed.length > 0 ? `<strong style="color:var(--gold)">→ Das hast du noch nicht entdeckt:</strong><br>${missedLabels}<br><br>` : ''}
+    <strong style="color:var(--blue)">✏ Analog-Aufgabe:</strong><br>
+    Schreibe jetzt alle 5 Merkmale einer Fabel als nummerierte Liste in dein Heft!`;
+}
+
+function restartGame() {
+  questionsAsked = 0;
+  xp = 0;
+  selectedMerkmale = new Set();
+  conversationHistory = [];
+  timeLeft = 15 * 60;
+  timerStarted = false;
+  clearInterval(timerInterval);
+  document.getElementById('timerDisplay').textContent = '15:00';
+  document.getElementById('timerFill').style.width = '100%';
+  document.getElementById('timerFill').style.background = 'var(--green)';
+  document.getElementById('interviewHistory').innerHTML = '';
+  document.getElementById('progressBar').style.display = 'none';
+  document.getElementById('xpDisplay').textContent = '0';
+  document.getElementById('xpFill').style.width = '0%';
+  showScreen('start');
+}
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+
+function addXP(amount) {
+  xp = Math.min(100, xp + amount);
+  document.getElementById('xpDisplay').textContent = xp;
+  document.getElementById('xpFill').style.width = xp + '%';
+}
+
+function typeText(elementId, text) {
+  const el = document.getElementById(elementId);
+  el.textContent = '';
+  let i = 0;
+  const speed = text.length > 100 ? 12 : 20;
+  const interval = setInterval(() => {
+    el.textContent += text[i];
+    i++;
+    if (i >= text.length) clearInterval(interval);
+  }, 1000 / speed);
+}
+
+function toggleCheck(li) {
+  li.classList.toggle('checked');
+}
+
+// Wire up secure btn properly
+document.getElementById('secureBtn').onclick = goToActualResult;
+document.getElementById('questionInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askQuestion(); }
+});
+
+// Draw fox on canvas init
+window.addEventListener('load', () => {
+  const canvas = document.getElementById('charCanvas');
+  drawFox(canvas);
+});
 </script>
 
 </body>
